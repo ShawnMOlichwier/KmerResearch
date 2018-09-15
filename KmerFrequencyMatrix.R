@@ -1,0 +1,22 @@
+#source("https://bioconductor.org/biocLite.R")
+#biocLite("Biostrings")
+
+# Run these the first time if you need to install the biostrings library
+
+
+library("Biostrings")
+# Here we load the files that will run through the Kmer counting package. 
+dna1 = readDNAStringSet("C:/Users/Shawn/Desktop/BioInformatics/Download_Files/dm3.kc167.tads.inside.test.fa")
+
+# Pretty simple application for counting the Kmer Frequency. All of the heavy lifting
+# is done in the biostrings library.
+kmercounts = oligonucleotideFrequency(dna1, width = 4, step = 1, with.labels = TRUE)
+rownames(kmercounts) <- labels(dna1)
+
+# This line is optional, but it is always nice to see your data come out looking nice.
+kmercounts
+
+# Finally, we output the matrix of Kmer counts to a text file, for later manipulation
+write.table(kmercounts, file = "C:/Users/Shawn/Desktop/BioInformatics/DNA_Text_Files/insideTest", row.names = TRUE, col.names = TRUE, sep = ' ')
+
+
