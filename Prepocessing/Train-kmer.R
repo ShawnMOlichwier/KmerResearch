@@ -22,3 +22,13 @@ names(kmercounts)[length(kmercounts)] <- "Class" #rename the last column of the 
 
 # Finally, we output the matrix of Kmer counts to a text file, for later manipulation
 write.table(kmercounts, file = "C:/Users/Shawn/Desktop/BioInformatics/DNA_Text_Files/insideTest", row.names = TRUE, col.names = TRUE, sep = ' ')
+
+#Extra:
+kmercounts = read.table('C:/Users/lykha/Documents/Bioinformatics Research/4merTable/inside.train.txt', sep=',')
+kmercounts = data.frame(kmercounts) #convert matrix to data frame
+cbind(kmercounts, rep(0, 14070))
+names(kmercounts)[length(kmercounts)] <- "Class" #rename the last column of the data frame
+
+head(kmercounts)
+#Export the file to excel
+write.table(kmercounts, file = "C:/Users/lykha/Documents/Bioinformatics Research/4merTable/insideTrain.txt", sep = ',')
