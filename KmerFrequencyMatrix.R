@@ -13,8 +13,11 @@ dna1 = readDNAStringSet("C:/Users/Shawn/Desktop/BioInformatics/Download_Files/dm
 kmercounts = oligonucleotideFrequency(dna1, width = 4, step = 1, with.labels = TRUE)
 rownames(kmercounts) <- labels(dna1)
 
-# This line is optional, but it is always nice to see your data come out looking nice.
-kmercounts
+
+#Put "1" as train data in a new column 
+kmercounts = data.frame(kmercounts) #convert matrix to data frame
+cbind(kmercounts, rep(1, 14070))
+names(kmercounts)[length(kmercounts)] <- "Class" #rename the last column of the data frame
 
 # Finally, we output the matrix of Kmer counts to a text file, for later manipulation
 write.table(kmercounts, file = "C:/Users/Shawn/Desktop/BioInformatics/DNA_Text_Files/insideTest", row.names = TRUE, col.names = TRUE, sep = ' ')
