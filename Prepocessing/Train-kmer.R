@@ -1,21 +1,24 @@
-#Install package BioStrings
-source("https://bioconductor.org/biocLite.R")
-biocLite("Biostrings")
+
+#source("https://bioconductor.org/biocLite.R")
+#biocLite("Biostrings")
+
+# Run these the first time if you need to install the biostrings library
+
+
 library("Biostrings")
+# Here we load the files that will run through the Kmer counting package. 
+dna1 = readDNAStringSet("C:/Users/Shawn/Desktop/BioInformatics/Download_Files/dm3.kc167.tads.inside.test.fa")
 
-#Import .fa file to R using readDNAStringSet
-dna1 = readDNAStringSet("C:/Users/lyv5/Downloads/dm3.kc167.tads.boundary.train.fa")
+# Pretty simple application for counting the Kmer Frequency. All of the heavy lifting
+# is done in the biostrings library.
+kmercounts = oligonucleotideFrequency(dna1, width = 4, step = 1, with.labels = TRUE)
+rownames(kmercounts) <- labels(dna1)
 
-#Creating the kmer table using oligonucleotideFrequency
-kmerscounts = oligonucleotideFrequency(dna1, width = 1000, step = 4)
-
-#Using the dna sequence names as label in the kmer matrix
-rownames(kmercounts) <- label(dna1) 
 
 #Put "1" as train data in a new column 
 kmercounts = data.frame(kmercounts) #convert matrix to data frame
 cbind(kmercounts, rep(1, 14070))
 names(kmercounts)[length(kmercounts)] <- "Class" #rename the last column of the data frame
 
-#Export the file to text file
-write.table(kmercounts, file = "C:/Users/lyv5/Desktop/BioInformatics/DNA_Text_Files/boundary.train.txt", row.names = TRUE, col.names = TRUE, sep = ',')
+# Finally, we output the matrix of Kmer counts to a text file, for later manipulation
+write.table(kmercounts, file = "C:/Users/Shawn/Desktop/BioInformatics/DNA_Text_Files/insideTest", row.names = TRUE, col.names = TRUE, sep = ' ')
