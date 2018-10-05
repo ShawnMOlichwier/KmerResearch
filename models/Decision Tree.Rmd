@@ -1,0 +1,65 @@
+---
+title: "Decision Tree"
+author: "Vi Ly"
+date: "October 4, 2018"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load file to an R data frame. Assume column name that represents the class label is "class"
+
+Prepare training 
+```{r}
+file = "C:/Users/lykha/Documents/bioinformatic research/4mer/Train/4mertable.train.txt"
+training <- read.table(file,sep=",",header=TRUE)
+training <- training[,names(training) != "DNA"]
+head(training)
+training <- training[sample(nrow(training), nrow(training)), ] #randomizes the rows
+training$class[training$Class == "1"] <- "negative"
+training$class[training$Class == "0"] <- "positive"
+training$class <- factor(training$class)
+```
+
+Preparing testing data
+```{r}
+file = "C:/Users/lykha/Documents/bioinformatic research/4mer/Test/4mertable.test.txt"
+testing <- read.table(file,sep=",",header=TRUE)
+testing <- testing[,names(testing) != "DNA"]
+#Data$Class <- factor(Data$Class)
+testing <- testing[sample(nrow(testing), nrow(testing)), ] #randomizes the rows
+testing$Class[testing$Class == "1"] <- "negative"
+testing$Class[testing$Class == "0"] <- "positive"
+#intrain <- createDataPartition(y = Data$Class,p = 0.8,list = FALSE) #split data
+testing$Class <- factor(testing$Class)
+```
+
+
+Load R libraries for model generation
+```{r}
+suppressMessages(library(caret))
+suppressMessages(library(e1071))
+```
+e1071 decision trees
+```{r}
+library(e1071)
+do.e071.DT <- function(training)
+{
+ 
+ dec_tree <- tune.rpart(class ~ . , data = training , minsplit=c(5,10,15,20),cp = 2^seq(from = -20 , to= 0, by = 2) )
+ dec_tree
+}
+```
+## Now to tune models, simply call the functions
+
+e1071 decision trees
+```{r}
+DT.Fit <- do.e071.DT(training)
+print(DT.Fit)
+#predict using tuned DT.Fit
+Pred <-  predict(DT.Fit$best.model,testing,type="class")
+cm <- confusionMatrix(Pred,testing$class)
+print(cm)
+```
