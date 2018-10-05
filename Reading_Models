@@ -1,11 +1,4 @@
-> logRegression <- readRDS('LogRegression.rds')
-> training <- read.csv('https://raw.githubusercontent.com/OliShawn/KmerResearch/master/4merTable/Train/4mertable.train.txt',header = TRUE)
-> training <- training[,names(training) != "DNA"]
-> #head(training)
-> training <- training[sample(nrow(training), nrow(training)), ] #randomizes the rows
-> training$Class[training$Class == "1"] <- "negative"
-> training$Class[training$Class == "0"] <- "positive"
-> training$Class <- factor(training$Class)
-> View(logRegression)
-> final_predictions <- predict(logRegression, testing)
-> final_predictions
+logRegression <- readRDS('LogRegression.rds')
+
+final_predictions <- predict(logRegression, testing)
+final_predictions
