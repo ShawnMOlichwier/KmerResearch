@@ -1,0 +1,141 @@
+---
+title: "PolySVM"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+install.packages("caret")
+install.packages("e1071")
+```
+
+```{r}
+suppressMessages(library(caret))
+suppressMessages(library(e1071))
+```
+
+Reading in training data
+```{r}
+training <- read.csv('https://raw.githubusercontent.com/OliShawn/KmerResearch/master/4merTable/Train/4mertable.train.txt',header = TRUE)
+training <- training[,names(training) != "DNA"]
+#head(training)
+training <- training[sample(nrow(training), nrow(training)), ] #randomizes the rows
+training$Class[training$Class == "1"] <- "negative"
+training$Class[training$Class == "0"] <- "positive"
+training$Class <- factor(training$Class)
+```
+
+Reading in testing data
+```{r}
+testing = read.csv("https://raw.githubusercontent.com/OliShawn/KmerResearch/master/4merTable/Test/4mertable.test.txt")
+testing <- testing[,names(testing) != "DNA"]
+#Data$Class <- factor(Data$Class)
+testing <- testing[sample(nrow(testing), nrow(testing)), ] #randomizes the rows
+testing$Class[testing$Class == "1"] <- "negative"
+testing$Class[testing$Class == "0"] <- "positive"
+#intrain <- createDataPartition(y = Data$Class,p = 0.8,list = FALSE) #split data
+testing$Class <- factor(testing$Class)
+```
+
+
+Polynomial kernel svm
+```{r}
+
+do.PolyKernelSVM <- function(training)
+{
+  set.seed(1)
+  grid <- expand.grid(scale = 1, degree = c(1,2,3), C = 2^seq(from=-4,by = 1, to =8)) # set up sigma and cost parameters
+  print("Poly Kernel SVM") 
+  ctrl.cross <- trainControl(method = "cv", number = 5,classProbs = TRUE,savePredictions=TRUE)
+  svm.Fit <- train(Class ~ ., data= training,perProc = c("center", "scale"),
+      method = 'svmPoly', 
+      metric ='Accuracy',
+      tuneGrid= grid, 
+      trControl = ctrl.cross
+    )
+  svm.Fit
+}
+```
+
+Training and predicting 
+```{r}
+svm.poly.Fit<-do.PolyKernelSVM(training)
+Pred <- predict(svm.poly.Fit,testing)
+cm<- confusionMatrix(Pred,testing$Class)
+print(cm)
+
+```
+
+
+
+
+
+
+
+
+
+
+Ive included the code below for future reference, do not use to train or predict.
+## Decision boundary visualization
+
+## binary classification of Data with 2 attributes
+
+For visualization purposes, let's first look at a binary class data with two attributes.
+```{r}
+data1 <- rbind(training, testing)
+head(data1)
+data1$Class <- factor(data1$Class)
+```
+The two classes are linearly non-separable
+```{r}
+ggplot(data=data1) + geom_point(aes(x=x,y=y,col=Class))
+```
+
+Now, lets visualize the decision boundary. First create a new testing data set as a grid of points and plot these points. Also overlay the original training set.
+```{r}
+x=seq(from=min(data1$x),to=max(data1$x),by=(max(data1$x)-min(data1$x))/100)
+y=seq(from=min(data1$y),to=max(data1$y),by=(max(data1$y)-min(data1$y))/100)
+new_data <- expand.grid(x=x,y=y)
+ggplot(data=new_data,aes(x=x,y=y)) + geom_point(alpha=0.2) + geom_point(data=training,aes(x=x,y=y,col=class))
+```
+
+Perform prediction on this new data set using the trained SVM radial kernel model. 
+```{r}
+Pred <- predict(svm.radial.Fit,new_data)
+#Pred <- predict(svm.radial.Fit,new_data,type = "prob") # for getting probabilities
+new_data$class <- Pred
+ggplot(data=new_data,aes(x=x,y=y,col=class)) + geom_point(alpha=0.2) + geom_point(data=training,aes(x=x,y=y,col=class))
+```
+Perform prediction on this new data set using the trained SVM linear kernel model. Here, We can see that the radial kernel is able to capture the non linearly in the data.
+```{r}
+Pred <- predict(svm.linear.Fit,new_data)
+new_data$class <- Pred
+ggplot(data=new_data,aes(x=x,y=y,col=class)) + geom_point(alpha=0.2) + geom_point(data=training,aes(x=x,y=y,col=class))
+```
+
+## Getting the support vectors and weights from radial basis model.
+
+Let's explore the trained model more. Getting the weights ($\alpha_{i}$'s) in the trained SVM model. 
+```{r}
+svm.radial.Fit$finalModel
+coef(svm.radial.Fit$finalModel)
+```
+Getting the support vectors (SVs) used. Note that the number of SVs is equal to number of weights ($\alpha_{i}$'s).
+```{r}
+#get the indices of the SVs
+I <- SVindex(svm.radial.Fit$finalModel)
+#get SVs using the indices
+SVs <- training[I,]
+SVs$SVs <- SVs$class
+#SVs
+print(SVs)
+
+Pred <- predict(svm.radial.Fit,new_data)
+new_data$class <- Pred
+ggplot(data=new_data,aes(x=x,y=y,col=class)) + geom_point(alpha=0.2) + geom_point(data=training,aes(x=x,y=y,col=class)) + geom_point(data=SVs,aes(x=x,y=y,col=SVs),shape=0,size=8) + ggtitle("SVs indicated by squares")
+```
+
