@@ -1,7 +1,7 @@
-Model,Accuracy,Sensitivity,Specificity,
-R forest,.9180,.8590,.9770,
-Boosted,.9165,.8650,.9680,
-Decision tree,.8215,.8680,.7750,
-regression,.7015,.7260,.6770,
-
+name        accuracy          sensitivity       specificity
+boosted     .9165              .8650            .9680
+regression  .7015              .7260            .6770
+R forest    .9180              .8590            .9770
+D tree      .8215              .8680            .7750
+KNN         .8335              .8970            .7700
 
