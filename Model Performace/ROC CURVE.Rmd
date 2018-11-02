@@ -1,0 +1,126 @@
+---
+title: "ROC CURVE"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Plotting ROC curves
+```{r}
+# install.packages("pROC")
+# install.packages("randomForest")
+#install.packages('C50')
+install.packages('kknn')
+suppressMessages(library(pROC))
+suppressMessages(library(caret))
+suppressMessages(library(e1071))
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load file to an R data frame. Assume column name that represents the class label is "class"
+
+Prepare training 
+```{r}
+training <- read.csv('https://raw.githubusercontent.com/OliShawn/KmerResearch/master/4merTable/Train/4mertable.train.txt',header = TRUE)
+training <- training[,names(training) != "DNA"]
+#head(training)
+training <- training[sample(nrow(training), nrow(training)), ] #randomizes the rows
+training$Class[training$Class == "1"] <- "negative"
+training$Class[training$Class == "0"] <- "positive"
+training$Class <- factor(training$Class)
+```
+
+Preparing testing data
+```{r}
+testing = read.csv("https://raw.githubusercontent.com/OliShawn/KmerResearch/master/4merTable/Test/4mertable.test.txt")
+testing <- testing[,names(testing) != "DNA"]
+testing <- testing[sample(nrow(testing), nrow(testing)), ] #randomizes the rows
+testing$Class[testing$Class == "1"] <- "negative"
+testing$Class[testing$Class == "0"] <- "positive"
+testing$Class <- factor(testing$Class)
+```
+
+
+Before doing this you need to read the trained models into the environment.
+Let's start with Random Forest i.e. loading the rds files from your computer.
+
+
+Starting our plots with Random Forest, our best 'out of the box' model.
+```{r}
+library(pROC)
+library(randomForest)
+# Select a parameter setting
+randomForestPred <-  predict(randomForest, testing, type = 'prob')
+cm <- confusionMatrix(randomForestPred, testing$Class)
+#print(cm)
+
+result.roc <- roc(testing$Class, randomForestPred$negative) # Draw ROC curve.
+plot(result.roc, print.thres="best", print.thres.best.method="closest.topleft")
+auc(result.roc)
+```
+
+
+
+Second, we will plot the boosted trees, again, be sure to import the trained model to predict.
+```{r}
+library(pROC)
+# Select a parameter setting
+boostedPred <-  predict(boostedTrees, testing, type="prob")
+#cm <- confusionMatrix(randomForestPred, testing$Class)
+#print(cm)
+
+result.roc <- roc(testing$Class, boostedPred$negative) # Draw ROC curve.
+plot(result.roc, print.thres="best", print.thres.best.method="closest.topleft")
+auc(result.roc)
+```
+
+
+
+Lastly, we will plot the KNN ROC curve
+```{r}
+library(pROC)
+library(kknn)
+# Select a parameter setting
+KNNPred <-  predict(KNNmodel, testing, type="prob")
+#cm <- confusionMatrix(randomForestPred, testing$Class)
+#print(cm)
+
+result.roc <- roc(testing$Class, KNNPred$negative) # Draw ROC curve.
+plot(result.roc, print.thres="best", print.thres.best.method="closest.topleft")
+auc(result.roc)
+```
+
+Logistic Regression
+```{r}
+library(pROC)
+# Select a parameter setting
+logPred <-  predict(LogRegression, testing, type="prob")
+#cm <- confusionMatrix(randomForestPred, testing$Class)
+#print(cm)
+
+result.roc <- roc(testing$Class, logPred$negative) # Draw ROC curve.
+plot(result.roc, print.thres="best", print.thres.best.method="closest.topleft")
+auc(result.roc)
+```
+
+Boosted Tree
+```{r}
+library(pROC)
+# Select a parameter setting
+treePred <-  predict(boostedTrees, testing, type="prob")
+#cm <- confusionMatrix(randomForestPred, testing$Class)
+#print(cm)
+
+result.roc <- roc(testing$Class, treePred$negative) # Draw ROC curve.
+plot(result.roc, print.thres="best", print.thres.best.method="closest.topleft")
+auc(result.roc)
+```
+
+
+
