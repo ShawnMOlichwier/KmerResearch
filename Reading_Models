@@ -1,4 +1,0 @@
-logRegression <- readRDS('LogRegression.rds')
-
-final_predictions <- predict(logRegression, testing)
-final_predictions

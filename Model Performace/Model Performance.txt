@@ -1,6 +1,0 @@
-Name,Accuracy,Sensitivity,Specificity
-Random Forest,.9180,.8590,.9770
-Boosted tree,.9165,.8650,.9680
-Logistic Regression,.7015,.7260,.6770
-Decision tree,.8215,.8680,.7750
-KNN,.8335,.8970,.7700
