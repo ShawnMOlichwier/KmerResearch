@@ -1,4 +1,4 @@
 This is the raw fruit fly data that was gathered. Must be processed before you use it for analysis. See other 4/6/8/12mer.txt files for
 the processed data.
 
-I repeat. Do not use this data unless you are going to process it first. 
+I repeat. Do not use this data unless you are going to process it first, you will get no results as it is a fasta file.

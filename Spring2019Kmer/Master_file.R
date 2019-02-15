@@ -23,6 +23,8 @@ testing$class[testing$class == "1"] <- "positive" # Assigns "Positive" to the 1 
 testing$class[testing$class == "0"] <- "negative" # Assigns 'Negative' to the 0 class
 testing$class <- factor(testing$class)
 testing <- data.frame(testing)
+
+
 #################################################################################
 
 ##############################################################################
@@ -34,7 +36,7 @@ suppressMessages(library(e1071))
 #############################################################################
 #CARET Random Forest definition
 do.RF <- function(training)
-{  
+{
   set.seed(313)
   n <- dim(training)[2]
   gridRF <- expand.grid(mtry = seq(from=0,by=as.integer(n/10),to=n)[-1]) #may need to change this depend on your data size
@@ -50,7 +52,7 @@ rf.Fit <- do.RF(training) #training done here
 
 Pred <-  predict(rf.Fit, testing)#prediction on the testing set
 cm <- confusionMatrix(Pred, testing$class)
-print("CM for RF:") 
+print("CM for RF:")
 print(cm)
 saveRDS(rf.Fit, "/Users/group13/Downloads/kmer_6_12/RF_6mer.rds") #saves the model to an rds file
 #############################################################################
@@ -59,7 +61,7 @@ saveRDS(rf.Fit, "/Users/group13/Downloads/kmer_6_12/RF_6mer.rds") #saves the mod
 #############################################################################
 #CARET boosted trees definition
 do.Boost <- function(training)
-{ 
+{
   #trials = number of boosting iterations, or (simply number of trees)
   #winnow = remove unimportant predictors
   gridBoost <- expand.grid(model="tree",trials=seq(from=1,by=2,to=100),winnow=FALSE)
@@ -67,7 +69,7 @@ do.Boost <- function(training)
   ctrl.crossBoost <- trainControl(method = "cv",number = 10,classProbs = TRUE,savePredictions = TRUE,allowParallel=TRUE)
   C5.0.Fit <- train(class ~ .,data = training,method = "C5.0",metric = "Accuracy",preProc = c("center", "scale"),
                     tuneGrid = gridBoost,trControl = ctrl.crossBoost)
-  
+
   C5.0.Fit
 }
 #training
@@ -84,7 +86,7 @@ saveRDS(boost.Fit, "/Users/group13/Downloads/kmer_6_12/Boost_6mer.rds") #saves t
 
 
 ############################################################################
-#CARET KNN 
+#CARET KNN
 #controls
 #install.packages("knn", dependencies = TRUE)
 grid = expand.grid(kmax=c(1:20),distance=10,kernel="optimal")
@@ -93,7 +95,7 @@ ctrl.cross <- trainControl(method="cv",number=10, classProbs=TRUE,savePrediction
 #training
 knnFit.cross <- train(class ~ .,
 data = training, # training data
-method ="kknn",  # model  
+method ="kknn",  # model
 metric="Accuracy", #evaluation metric
 preProc=c("center","scale"), # data to be scaled
 tuneGrid = grid, # range of parameters to be tuned
@@ -132,7 +134,7 @@ DT.Fit <- do.DT(training)
 
 Pred <- predict(DT_Fit,testing) #prediction on the testing set
 Pred <- predict(RF_6mer,testing)
-cm<- confusionMatrix(Pred,testing$class) 
+cm<- confusionMatrix(Pred,testing$class)
 cm<- confusionMatrix(Pred,testing$class, mode = 'prec_recall')
 print("CM for DT:")
 print(cm)
@@ -216,7 +218,7 @@ print(DT.Fit)
 #predict using tuned DT.Fit
 Pred <-  predict(DT.Fit$best.model,testing,type="class")
 cm <- confusionMatrix(Pred,testing$class)
-cm <- confusionMatrix(Pred, testing$class, mode = "prec_recall") 
+cm <- confusionMatrix(Pred, testing$class, mode = "prec_recall")
 print(cm)
 
 Pred <-  predict(logreg.fit01, testing, type = "prob")
